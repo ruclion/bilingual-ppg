@@ -62,7 +62,7 @@ def main():
         assert mfcc.shape[0] == (np.squeeze(ppgs)).shape[0]
 
         # 存储PPG
-        ppg_f_path = os.path.join(ppg_dir, fname[:-4] + '.npy')
+        ppg_f_path = os.path.join(ppg_dir, fname + '.npy')
         np.save(ppg_f_path, np.squeeze(ppgs))
 
     duration = time.time() - start_time

@@ -39,25 +39,16 @@ assert hparams == audio_hparams
 
 use_cuda = torch.cuda.is_available()
 assert use_cuda is True
+ckpt_path_ljspeech = './const_ckpt_dir/checkpoint_step000032100.pth'
 
 
-# 输入的路径,其中fname是wavs的全局路径
+# 输入的路径,其中fname是inference_wavs_path_list中的,只是名字,无后缀,无路径
 meta_path = '../inference_wavs_path_list.txt'
-wav_dir_path = '../wav_list'
-mfcc_dir = '../xxx_mfcc_5ms_by_audio_2'
+ppg_dir = '../xxx_ppg_5ms_by_audio_2'
 
 
 # 输出的路径
 rec_wav_dir = '../xxx_rec_wavs_audio_2'
-if os.path.exists(ppgs_paths) is False:
-    os.makedirs(ppgs_paths)
-
-
-# 超参数和路径
-ckpt_path_ljspeech = './const_ckpt_dir/checkpoint_step000032100.pth'
-
-
-ppgs_paths = 'inference_ppgs_path_list.txt'
 
 
 # 全局变量
@@ -105,15 +96,15 @@ def main():
     global model
     model = tts_load(model=model, ckpt_path=ckpt_path_ljspeech)
 
-
-    ppgs_list = open(ppgs_paths, 'r')
-    ppgs_list = [i.strip() for i in ppgs_list]
-    for idx, ppg_path in tqdm(enumerate(ppgs_list)):
+    a = open(meta_path, 'r').readlines()
+    a = [i.strip() for i in a]
+    for fname in tqdm(a):
+        ppg_path = os.path.join(ppg_dir, fname + '.npy')
         ppg = np.load(ppg_path)
-        mel_pred, spec_pred, mel_pred_audio, spec_pred_audio = tts_predict(model, ppg)
+        _mel_pred, _spec_pred, mel_pred_audio, spec_pred_audio = tts_predict(model, ppg)
 
-        write_wav(os.path.join(ljspeech_log_dir, "{}_sample_mel.wav".format(idx)), mel_pred_audio)
-        write_wav(os.path.join(ljspeech_log_dir, "{}_sample_spec.wav".format(idx)), spec_pred_audio)
+        write_wav(os.path.join(rec_wav_dir, fname + '_mel_ljspeech.wav'), mel_pred_audio)
+        write_wav(os.path.join(rec_wav_dir, fname + '_spec_ljspeech.wav'), spec_pred_audio)
 
         # np.save(os.path.join(ljspeech_log_dir, "{}_sample_mel.npy".format(idx)), mel_pred)
         # np.save(os.path.join(ljspeech_log_dir, "{}_sample_spec.npy".format(idx)), spec_pred)
