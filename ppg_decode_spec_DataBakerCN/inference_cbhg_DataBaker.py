@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from tqdm import tqdm
-from datetime import datetime
 from matplotlib import pyplot as plt
 plt.switch_backend('agg')
 
@@ -40,16 +39,16 @@ assert hparams == audio_hparams
 
 use_cuda = torch.cuda.is_available()
 assert use_cuda is True
+ckpt_path_DataBakerCN = './const_ckpt/checkpoint_step000034800.pth'
 
 
-# 超参数和路径
-STARTED_DATESTRING = "{0:%Y-%m-%dT%H-%M-%S}".format(datetime.now())
-ckpt_path_DataBakerCN = '/datapool/home/hujk17/ppg_decode_spec_5ms_sch_DataBakerCN/restoreANDvalitation_DataBakerCN_log_dir/2020-10-15T21-03-07/ckpt_model/checkpoint_step000031800.pth'
+# 输入的路径,其中fname是inference_wavs_path_list中的,只是名字,无后缀,无路径
+meta_path = '../inference_wavs_path_list.txt'
+ppg_dir = '../xxx_ppg_5ms_by_audio_2'
 
-ppgs_paths = 'inference_ppgs_path_list.txt'
-DataBakerCN_log_dir = os.path.join('inference_DataBakerCN_log_dir', STARTED_DATESTRING)
-if os.path.exists(DataBakerCN_log_dir) is False:
-    os.makedirs(DataBakerCN_log_dir, exist_ok=True)
+
+# 输出的路径
+rec_wav_dir = '../xxx_rec_wavs_audio_2'
 
 # 全局变量
 model = DCBHG()
@@ -96,21 +95,21 @@ def main():
     global model
     model = tts_load(model=model, ckpt_path=ckpt_path_DataBakerCN)
 
-
-    ppgs_list = open(ppgs_paths, 'r')
-    ppgs_list = [i.strip() for i in ppgs_list]
-    for idx, ppg_path in tqdm(enumerate(ppgs_list)):
+    a = open(meta_path, 'r').readlines()
+    a = [i.strip() for i in a]
+    for fname in tqdm(a):
+        ppg_path = os.path.join(ppg_dir, fname + '.npy')
         ppg = np.load(ppg_path)
-        mel_pred, spec_pred, mel_pred_audio, spec_pred_audio = tts_predict(model, ppg)
+        _mel_pred, _spec_pred, mel_pred_audio, spec_pred_audio = tts_predict(model, ppg)
 
-        write_wav(os.path.join(DataBakerCN_log_dir, "{}_sample_mel.wav".format(idx)), mel_pred_audio)
-        write_wav(os.path.join(DataBakerCN_log_dir, "{}_sample_spec.wav".format(idx)), spec_pred_audio)
+        write_wav(os.path.join(rec_wav_dir, fname + '_mel_databakercn.wav'), mel_pred_audio)
+        write_wav(os.path.join(rec_wav_dir, fname + '_spec_databakercn.wav'), spec_pred_audio)
 
-        np.save(os.path.join(DataBakerCN_log_dir, "{}_sample_mel.npy".format(idx)), mel_pred)
-        np.save(os.path.join(DataBakerCN_log_dir, "{}_sample_spec.npy".format(idx)), spec_pred)
+        # np.save(os.path.join(DataBakerCN_log_dir, "{}_sample_mel.npy".format(idx)), mel_pred)
+        # np.save(os.path.join(DataBakerCN_log_dir, "{}_sample_spec.npy".format(idx)), spec_pred)
 
-        draw_spec(os.path.join(DataBakerCN_log_dir, "{}_sample_mel.png".format(idx)), mel_pred)
-        draw_spec(os.path.join(DataBakerCN_log_dir, "{}_sample_spec.png".format(idx)), spec_pred)
+        # draw_spec(os.path.join(DataBakerCN_log_dir, "{}_sample_mel.png".format(idx)), mel_pred)
+        # draw_spec(os.path.join(DataBakerCN_log_dir, "{}_sample_spec.png".format(idx)), spec_pred)
       
     
 
