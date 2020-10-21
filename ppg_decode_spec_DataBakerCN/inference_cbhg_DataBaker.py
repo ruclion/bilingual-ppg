@@ -1,8 +1,8 @@
 import os
 import numpy as np
 from tqdm import tqdm
-from matplotlib import pyplot as plt
-plt.switch_backend('agg')
+# from matplotlib import pyplot as plt
+# plt.switch_backend('agg')
 
 import torch
 from torch.autograd import Variable

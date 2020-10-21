@@ -11,7 +11,7 @@ import numpy as np
 from scipy.io import wavfile
 from scipy import signal
 from scipy.fftpack import dct
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 
